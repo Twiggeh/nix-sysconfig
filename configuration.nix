@@ -40,7 +40,7 @@
   # };
 
   networking = {
-    hostName = "albert-laptop";
+    hostName = "${user}-laptop";
     networkmanager.enable = true;
   };
 
@@ -63,9 +63,9 @@
 
   console.keyMap = "de";
 
-  users.users.albert = {
+  users.users.${user} = {
     isNormalUser = true;
-    description = "albert";
+    description = user;
     extraGroups = [ "networkmanager" "wheel" "video" "lp" "scanner" "docker" ];
     packages = with pkgs; [ ];
   };

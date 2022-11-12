@@ -25,6 +25,7 @@
     in {
       nixosConfigurations = {
         ${user} = lib.nixosSystem {
+          specialArgs = { inherit user; };
           inherit system;
           modules = [
             ./configuration.nix
