@@ -10,6 +10,9 @@
     waybar
     wofi
     wofi-emoji
+		krita
+		ffmpeg
+		ranger
   ];
   programs.vscode = {
     enable = true;
