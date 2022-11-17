@@ -13,6 +13,8 @@
 		krita
 		ffmpeg
 		ranger
+		davinci-resolve
+		insomnia
   ];
   programs.vscode = {
     enable = true;
