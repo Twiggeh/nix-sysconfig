@@ -15,6 +15,7 @@
 		ranger
 		davinci-resolve
 		insomnia
+		mpv
   ];
   programs.vscode = {
     enable = true;

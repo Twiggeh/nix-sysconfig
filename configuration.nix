@@ -80,6 +80,7 @@
     git
     tmux
     xdg-desktop-portal-wlr
+		pulseaudio
   ];
 
   system.stateVersion = "22.05";
@@ -88,7 +89,7 @@
     enable = true;
     mediaKeys.enable = true;
   };
-  hardware.pulseaudio.enable = true;
+
   hardware.bluetooth = {
     enable = true;
     settings = { General = { Enable = "Source,Sink,Media,Socket"; }; };
@@ -110,10 +111,20 @@
     extraOptions = "experimental-features = nix-command flakes";
   };
 
+  security.rtkit.enable = true;
+
   services = {
     pipewire = {
       enable = true;
+			alsa.enable = true;
+			alsa.support32Bit = true;
+			pulse.enable = true;
+			jack.enable = true;
       wireplumber = { enable = true; };
     };
   };
+
+	fonts.fonts = with pkgs; [
+		(nerdfonts.override { fonts = [ "FiraCode" ]; })
+	];
 }
