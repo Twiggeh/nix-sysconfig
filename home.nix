@@ -13,9 +13,9 @@
 		krita
 		ffmpeg
 		ranger
-		davinci-resolve
 		insomnia
 		mpv
+		android-studio
   ];
   programs.vscode = {
     enable = true;

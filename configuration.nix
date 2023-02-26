@@ -2,16 +2,17 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-##    # NVIDIA
-#  let nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
-#   export __NV_PRIME_RENDER_OFFLOAD=1
-#   export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-GO
-#   export __GLX_VENDOR_LIBRARY_NAME=nvidia
-#   export __VK_LAYER_NV_optimus=NVIDIA_only
-#   exec "$@"
-#  '';
-
-{ nixpkgs, user, pkgs, ... }: {
+{ nixpkgs, config, user, pkgs, ... } :
+let
+  nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+    exec -a "$1" "$@"
+  '';
+in
+{
   nixpkgs.config.allowUnfree = true;
   imports = [ ./hardware-configuration.nix ];
 
@@ -29,22 +30,33 @@
       configurationLimit = 5;
     };
   };
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_1;
+	boot.kernel.sysctl = { "vm.swappiness" = 0; };
 
-  # hardware.opengl.enable = true;
-  # environment.systemPackages = [ nvidia-offload ];
-  # hardware.nvidia.prime = {
-  #   offload.enable = true;
-  #   nvidiaBusId = "PCI:1:00:0";
-  #   amdBusId = "PCI:6:00:0";
-  # };
-
+  hardware = {
+		opengl = {
+			enable = true;
+			# extraPackages = [ pkgs.rocm-opencl-icd pkgs.amdvlk ]; 
+			# extraPackages32 = [ pkgs.driversi686Linux.amdvlk ]; 
+		};
+		nvidia = {
+			powerManagement.enable = true;	
+			modesetting.enable = true;
+			package = config.boot.kernelPackages.nvidiaPackages.stable;
+		 prime = {
+		 	offload.enable = true;
+		 	nvidiaBusId = "PCI:1:00:0";
+		 	amdgpuBusId = "PCI:6:00:0";
+		 };
+		};
+	};
+	
   networking = {
     hostName = "${user}-laptop";
     networkmanager.enable = true;
   };
 
-  time.timeZone = "Europe/Berlin";
+  time.timeZone = "Europe/Helsinki";
 
   i18n = {
     defaultLocale = "en_US.utf8";
@@ -67,7 +79,6 @@
     isNormalUser = true;
     description = user;
     extraGroups = [ "networkmanager" "wheel" "video" "lp" "scanner" "docker" ];
-    packages = with pkgs; [ ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -81,6 +92,7 @@
     tmux
     xdg-desktop-portal-wlr
 		pulseaudio
+		nvidia-offload
   ];
 
   system.stateVersion = "22.05";
@@ -95,17 +107,6 @@
     settings = { General = { Enable = "Source,Sink,Media,Socket"; }; };
   };
 
-  # nixpkgs.overlays = [
-  #   (self: super: {
-  #     discord = super.discord.overrideAttrs (old: {
-  #       src = builtins.fetchTarball {
-  #         url = "https://discord.com/api/download?platform=linux&format=tar.gz";
-  #         sha256 = "0000000000000000000000000000000000000000000000000000";
-  #       };
-  #     });
-  #   })
-  # ];
-
   nix = {
     package = pkgs.nixFlakes;
     extraOptions = "experimental-features = nix-command flakes";
@@ -114,6 +115,7 @@
   security.rtkit.enable = true;
 
   services = {
+		xserver.videoDrivers = [ "nvidia" ];
     pipewire = {
       enable = true;
 			alsa.enable = true;
@@ -127,4 +129,4 @@
 	fonts.fonts = with pkgs; [
 		(nerdfonts.override { fonts = [ "FiraCode" ]; })
 	];
-}
+} 
