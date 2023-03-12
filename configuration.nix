@@ -9,7 +9,7 @@ let
     export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
     export __GLX_VENDOR_LIBRARY_NAME=nvidia
     export __VK_LAYER_NV_optimus=NVIDIA_only
-    exec -a "$1" "$@"
+    exec "$@"
   '';
 in
 {
@@ -30,24 +30,23 @@ in
       configurationLimit = 5;
     };
   };
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_1;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 	boot.kernel.sysctl = { "vm.swappiness" = 0; };
 
   hardware = {
-		opengl = {
-			enable = true;
-			# extraPackages = [ pkgs.rocm-opencl-icd pkgs.amdvlk ]; 
-			# extraPackages32 = [ pkgs.driversi686Linux.amdvlk ]; 
-		};
+		opengl.enable = true;
 		nvidia = {
-			powerManagement.enable = true;	
+			powerManagement = {
+				enable = true;	
+				finegrained = true;
+			};
 			modesetting.enable = true;
-			package = config.boot.kernelPackages.nvidiaPackages.stable;
-		 prime = {
-		 	offload.enable = true;
-		 	nvidiaBusId = "PCI:1:00:0";
-		 	amdgpuBusId = "PCI:6:00:0";
-		 };
+			package = config.boot.kernelPackages.nvidiaPackages.beta;
+		  prime = {
+		  	offload.enable = true;
+		  	nvidiaBusId = "PCI:1:0:0";
+		  	amdgpuBusId = "PCI:6:0:0";
+		  };
 		};
 	};
 	
@@ -78,7 +77,7 @@ in
   users.users.${user} = {
     isNormalUser = true;
     description = user;
-    extraGroups = [ "networkmanager" "wheel" "video" "lp" "scanner" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "lp" "scanner" "docker" "plugdev" ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -93,6 +92,7 @@ in
     xdg-desktop-portal-wlr
 		pulseaudio
 		nvidia-offload
+		docker
   ];
 
   system.stateVersion = "22.05";
