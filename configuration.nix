@@ -55,7 +55,7 @@ in
     networkmanager.enable = true;
   };
 
-  time.timeZone = "Europe/Helsinki";
+  time.timeZone = "Europe/Berlin";
 
   i18n = {
     defaultLocale = "en_US.utf8";
@@ -129,4 +129,9 @@ in
 	fonts.fonts = with pkgs; [
 		(nerdfonts.override { fonts = [ "FiraCode" ]; })
 	];
+
+	networking.firewall = {
+		allowedTCPPorts = [ 9090 ];	
+		allowedUDPPorts = [ 9090 ];	
+	};
 } 

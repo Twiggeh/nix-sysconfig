@@ -15,7 +15,6 @@
 		ranger
 		insomnia
 		mpv
-		android-studio
   ];
   programs.vscode = {
     enable = true;
