@@ -93,6 +93,7 @@ in
 		pulseaudio
 		nvidia-offload
 		docker
+		lens
   ];
 
   system.stateVersion = "22.05";
