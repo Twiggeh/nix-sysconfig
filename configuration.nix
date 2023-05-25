@@ -16,24 +16,28 @@ in
   nixpkgs.config.allowUnfree = true;
   imports = [ ./hardware-configuration.nix ];
 
-  boot.loader = {
-    efi = {
-      canTouchEfiVariables = true;
-      efiSysMountPoint = "/boot/efi";
-    };
-    grub = {
-      enable = true;
-      version = 2;
-      devices = [ "nodev" ];
-      useOSProber = true;
-      efiSupport = true;
-      configurationLimit = 5;
-    };
-  };
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-	boot.kernel.sysctl = { "vm.swappiness" = 0; };
+	boot = {
+		loader = {
+			efi = {
+				canTouchEfiVariables = true;
+				efiSysMountPoint = "/boot/efi";
+			};
+			grub = {
+				enable = true;
+				devices = [ "nodev" ];
+				useOSProber = true;
+				efiSupport = true;
+				configurationLimit = 5;
+			};
+		};
+		kernelPackages = pkgs.linuxPackages_latest;
+		kernel.sysctl = { "vm.swappiness" = 0; };
+	};
 
   hardware = {
+		asus.battery = {
+			chargeUpto = 60;
+		};
 		opengl.enable = true;
 		nvidia = {
 			powerManagement = {
@@ -48,11 +52,17 @@ in
 		  	amdgpuBusId = "PCI:6:0:0";
 		  };
 		};
+		bluetooth = {
+			enable = true;
+			settings = { General = { Enable = "Source,Sink,Media,Socket"; }; };
+		};
+		opentabletdriver.enable = true;
 	};
 	
   networking = {
     hostName = "${user}-laptop";
     networkmanager.enable = true;
+		extraHosts = "127.0.0.1 localhost.newwork.chat";
   };
 
   time.timeZone = "Europe/Berlin";
@@ -101,11 +111,6 @@ in
   sound = {
     enable = true;
     mediaKeys.enable = true;
-  };
-
-  hardware.bluetooth = {
-    enable = true;
-    settings = { General = { Enable = "Source,Sink,Media,Socket"; }; };
   };
 
   nix = {

@@ -5,6 +5,7 @@
     playerctl
     brightnessctl
     kitty
+		alacritty
     slurp
     grim
     waybar
@@ -15,10 +16,11 @@
 		ranger
 		insomnia
 		mpv
+		rocm-smi
   ];
   programs.vscode = {
     enable = true;
-    package = pkgs.vscode.fhsWithPackages (ps: with ps; [ nixfmt rnix-lsp ]);
+    package = pkgs.vscode.fhsWithPackages (ps: with ps; [ nixfmt rnix-lsp python310Full ]);
   };
   home.file.".config/nvim" = {
     source = ./nvim;
