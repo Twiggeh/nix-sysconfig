@@ -26,9 +26,9 @@ null_ls.setup({
 		}),
 		-- Diagnostics
 		diagnostics.flake8,
-		--diagnostics.eslint_d,
+		diagnostics.eslint_d,
 		diagnostics.cspell,
 		-- Actions
-		--codeactions.eslint_d
+		codeactions.eslint_d
 	},
 })

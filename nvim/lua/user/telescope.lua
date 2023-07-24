@@ -1,7 +1,10 @@
 local status_ok, telescope = pcall(require, "telescope")
 if not status_ok then
+	print("Plugin: telescope not found")
 	return
 end
+
+print("hello there")
 
 local actions = require "telescope.actions"
 
@@ -80,36 +83,15 @@ telescope.setup {
 		},
 	},
 	pickers = {
-		-- Default configuration for builtin pickers goes here:
-		-- picker_name = {
-		--   picker_config_key = value,
-		--   ...
-		-- }
-		-- Now the picker_config_key will be applied every time you call this
-		-- builtin picker
 	},
 	extensions = {
-		-- Your extension configuration goes here:
-		-- extension_name = {
-		--   extension_config_key = value,
-		-- }
-		-- please take a look at the readme of the extension you want to configure
-		--   extensions = {
-		--
-		--   media_files = {
-		--     -- filetypes whitelist
-		--     -- defaults to {"png", "jpg", "mp4", "webm", "pdf"}
-		--     filetypes = {"png", "webp", "jpg", "jpeg"},
-		--     find_cmd = "rg" -- find command (defaults to `fd`)
-		--   }
 	},
 }
 
 local opts = { noremap = true, silent = true }
 
 --  File search dropdown with preview
-KEYMAP("n", "<c-p>", "<cmd>lua require'telescope.builtin'.find_files(require('telescope.themes').get_dropdown())<cr>",
-	opts)
+KEYMAP("n", "<c-p>", "<cmd>lua require'telescope.builtin'.find_files(require('telescope.themes').get_dropdown())<cr>", opts)
 
 -- Fuzzy string search in project
 KEYMAP("n", "<cs-f>", "<cmd>Telescope live_grep<cr>", opts)

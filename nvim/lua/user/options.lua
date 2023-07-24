@@ -25,7 +25,7 @@ local options = {
 	undodir = os.getenv("HOME") .. "/.config/nvim/undodir",
 	incsearch = true,
 
-	scrolloff = 8, -- is one of my fav
+	scrolloff = 8, 
 	sidescrolloff = 8,
 
 	clipboard = "unnamedplus", -- allows neovim to access the system clipboard
@@ -60,4 +60,4 @@ end
 
 vim.cmd "set whichwrap+=<,>,[,],h,l"
 vim.cmd [[set iskeyword+=-]]
-vim.cmd [[set formatoptions-=cro]] -- TODO: this doesn't seem to work
+vim.cmd [[set formatoptions-=cro]]

@@ -91,7 +91,14 @@ in
   };
 
   environment.systemPackages = with pkgs; [
+		# all for nvim
     neovim
+		ripgrep
+		fd
+		wl-clipboard
+		nodejs
+		gcc
+
     wget
     pciutils
     firefox
@@ -99,11 +106,17 @@ in
     google-chrome
     git
     tmux
-    xdg-desktop-portal-wlr
+
+		# all for Hyprland
+		libsForQt5.polkit-kde-agent
+		xdg-desktop-portal-hyprland
+		dunst
+
 		pulseaudio
 		nvidia-offload
-		docker
+		# docker
 		lens
+		k9s
   ];
 
   system.stateVersion = "22.05";
@@ -137,7 +150,7 @@ in
 	];
 
 	networking.firewall = {
-		allowedTCPPorts = [ 9090 ];	
-		allowedUDPPorts = [ 9090 ];	
+	#	allowedTCPPorts = [ 9090 443 ];	
+	#	allowedUDPPorts = [ 9090 443 ];	
 	};
 } 
