@@ -11,10 +11,33 @@ let
     export __VK_LAYER_NV_optimus=NVIDIA_only
     exec "$@"
   '';
-in
-{
+  flake-compat = builtins.fetchTarball {
+		url = "https://github.com/edolstra/flake-compat/archive/master.tar.gz";
+		sha256 = "0m9grvfsbwmvgwaxvdzv6cmyvjnlww004gfxjvcl806ndqaxzy4j";
+	};
+
+  hyprland-flake = (import flake-compat {
+    src = builtins.fetchTarball { 
+			url = "https://github.com/hyprwm/Hyprland/archive/master.tar.gz";
+			sha256 = "114xlngyql57bv6qxh8nwwj30hbz92629iwcf44ygw787ahzbny1";
+		};
+  }).defaultNix;
+in {
   nixpkgs.config.allowUnfree = true;
   imports = [ ./hardware-configuration.nix ];
+
+  nix.settings = {
+    trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
+		substituters = ["https://hyprland.cachix.org"];
+  };
+
+	environment.sessionVariables.NIXOS_OZONE_WL = "1";
+
+	programs.hyprland = { 
+		enable = true;
+		package = hyprland-flake.packages.${pkgs.system}.hyprland;
+	};
+
 
 	boot = {
 		loader = {
@@ -30,22 +53,26 @@ in
 				configurationLimit = 5;
 			};
 		};
-		kernelPackages = pkgs.linuxPackages_latest;
+		swraid.enable = false;
+		kernelPackages = pkgs.linuxPackages_6_6;
 		kernel.sysctl = { "vm.swappiness" = 0; };
 	};
 
   hardware = {
 		asus.battery = {
-			chargeUpto = 60;
+			chargeUpto = 40;
 		};
 		opengl.enable = true;
 		nvidia = {
+			modesetting.enable = true;
 			powerManagement = {
 				enable = true;	
 				finegrained = true;
 			};
-			modesetting.enable = true;
-			package = config.boot.kernelPackages.nvidiaPackages.beta;
+			open = false;
+			nvidiaSettings = true;
+			package = config.boot.kernelPackages.nvidiaPackages.stable;
+			dynamicBoost.enable = true;
 		  prime = {
 		  	offload.enable = true;
 		  	nvidiaBusId = "PCI:1:0:0";
@@ -62,7 +89,9 @@ in
   networking = {
     hostName = "${user}-laptop";
     networkmanager.enable = true;
-		extraHosts = "127.0.0.1 localhost.newwork.chat";
+		extraHosts = "
+			127.0.0.1 localhost.newwork.chat
+		";
   };
 
   time.timeZone = "Europe/Berlin";
@@ -92,12 +121,16 @@ in
 
   environment.systemPackages = with pkgs; [
 		# all for nvim
-    neovim
+		neovim
 		ripgrep
 		fd
 		wl-clipboard
 		nodejs
 		gcc
+		gnumake
+		unzip
+		lua-language-server
+		vscode.fhs 
 
     wget
     pciutils
@@ -106,17 +139,29 @@ in
     google-chrome
     git
     tmux
+		obs-studio
 
 		# all for Hyprland
-		libsForQt5.polkit-kde-agent
-		xdg-desktop-portal-hyprland
 		dunst
+		libsForQt5.qt5.qtwayland
+		qt6.qtwayland
+		swww
 
 		pulseaudio
 		nvidia-offload
+		supergfxctl
+		
 		# docker
-		lens
-		k9s
+		# lens
+		# k9s
+
+    # keyboard fix
+		keyd
+		# gnome-shell-extension-keyman
+
+    # for opengl
+		glib
+		libGL
   ];
 
   system.stateVersion = "22.05";
@@ -131,26 +176,47 @@ in
     extraOptions = "experimental-features = nix-command flakes";
   };
 
-  security.rtkit.enable = true;
+  security = {
+		rtkit.enable = true;
+		polkit.enable = true;
+	};
 
   services = {
 		xserver.videoDrivers = [ "nvidia" ];
+		asusd.enable = true;
+		keyd = {
+			enable = true;
+			keyboards = {
+				default = {
+					ids = ["*"];
+					settings = {
+						main = {
+							capslock = "esc";
+				#			"/" = "noop";
+						};
+				# "alt" = {
+				#			";" = "/";
+				#		};
+					};
+				};
+			};
+		};
     pipewire = {
       enable = true;
 			alsa.enable = true;
 			alsa.support32Bit = true;
 			pulse.enable = true;
 			jack.enable = true;
-      wireplumber = { enable = true; };
+      wireplumber.enable = true;
     };
   };
 
-	fonts.fonts = with pkgs; [
+	fonts.packages = with pkgs; [
 		(nerdfonts.override { fonts = [ "FiraCode" ]; })
 	];
 
 	networking.firewall = {
-	#	allowedTCPPorts = [ 9090 443 ];	
-	#	allowedUDPPorts = [ 9090 443 ];	
+		allowedTCPPorts = [ ]; # 9090 443  3000 ];	
+		allowedUDPPorts = [ ]; # 9090 443 8081 3000 ];	
 	};
 } 
