@@ -11,33 +11,13 @@ let
     export __VK_LAYER_NV_optimus=NVIDIA_only
     exec "$@"
   '';
-  flake-compat = builtins.fetchTarball {
-		url = "https://github.com/edolstra/flake-compat/archive/master.tar.gz";
-		sha256 = "0m9grvfsbwmvgwaxvdzv6cmyvjnlww004gfxjvcl806ndqaxzy4j";
-	};
-
-  hyprland-flake = (import flake-compat {
-    src = builtins.fetchTarball { 
-			url = "https://github.com/hyprwm/Hyprland/archive/master.tar.gz";
-			sha256 = "114xlngyql57bv6qxh8nwwj30hbz92629iwcf44ygw787ahzbny1";
-		};
-  }).defaultNix;
 in {
   nixpkgs.config.allowUnfree = true;
   imports = [ ./hardware-configuration.nix ];
 
-  nix.settings = {
-    trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
-		substituters = ["https://hyprland.cachix.org"];
-  };
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
-	environment.sessionVariables.NIXOS_OZONE_WL = "1";
-
-	programs.hyprland = { 
-		enable = true;
-		package = hyprland-flake.packages.${pkgs.system}.hyprland;
-	};
-
+	programs.hyprland.enable = true;
 
 	boot = {
 		loader = {
