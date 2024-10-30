@@ -33,16 +33,17 @@ in {
 			};
 		};
 		swraid.enable = false;
-		# kernelPackages = pkgs.linuxPackages_6_6;
 		kernel.sysctl = { "vm.swappiness" = 0; };
 	};
 
 	hardware = {
 		asus.battery = {
-			chargeUpto = 100;
+			chargeUpto = 60;
 		};
-		# pulseaudio.enable = true;
-		graphics.enable = true;
+		opengl = {
+			enable = true;
+			# enable32Bit = true;
+		};
 		nvidia = {
 			modesetting.enable = true;
 			powerManagement = {
@@ -66,7 +67,7 @@ in {
 			enable = true;
 			settings = { General = { Enable = "Source,Sink,Media,Socket"; }; };
 		};
-		opentabletdriver = { 
+		opentabletdriver = {
 			enable = true;
 			daemon.enable = true;
 		};
@@ -75,9 +76,13 @@ in {
 	networking = {
 		hostName = "${user}-laptop";
 		networkmanager.enable = true;
-		# extraHosts = "
-		#	 127.0.0.1 localhost.newwork.chat
-		# ";
+		extraHosts = ''
+			127.0.0.1 twig.com
+		'';
+		firewall = {
+			allowedTCPPorts = [ 3000 5173 5174 4173 6001 ];
+			allowedUDPPorts = [ 3001 5173 5174 4173 6001 ];
+		};
 	};
 
 	time.timeZone = "Europe/Berlin";
@@ -111,7 +116,7 @@ in {
 		ripgrep
 		fd
 		wl-clipboard
-		nodejs
+		nodejs_22
 		typescript
 		gcc
 		gnumake
@@ -126,9 +131,11 @@ in {
 		git
 		tmux
 
+		# my packages
 		openvpn
 		obs-studio
 		kdenlive
+		lazygit
 
 		# all for Hyprland
 		dunst
@@ -136,13 +143,12 @@ in {
 		qt6.qtwayland
 		swww
 		egl-wayland
+		wayland-scanner
 
-		nvidia-offload
-		supergfxctl
-		
-		# docker
+		docker
 		# lens
-		# k9s
+		k9s
+		kubectl
 
 		# keyboard fix
 		keyd
@@ -151,13 +157,23 @@ in {
 		# for opengl
 		glib
 		libGL
+
+		#gpu
+		lact
+		nvidia-offload
+		supergfxctl
+
+		#usb
+		usbutils
+		udiskie
+		udisks
 	];
 
 	system.stateVersion = "22.05";
 
-	
 	nix = {
-		package = pkgs.nixFlakes;
+		# package = pkgs.nixFlakes;
+		package = pkgs.nixVersions.git;
 		extraOptions = "experimental-features = nix-command flakes";
 	};
 
@@ -166,7 +182,20 @@ in {
 		polkit.enable = true;
 	};
 
+
+	systemd.services.lactd = {
+		description = "AMDGPU Control Daemon";
+		enable = true;  
+		serviceConfig = {
+			ExecStart = "${pkgs.lact}/bin/lact daemon";
+		};
+		wantedBy = ["multi-user.target"];
+	};
+
+
 	services = {
+		gvfs.enable = true;
+		udisks2.enable = true;
 		xserver.videoDrivers = [ "nvidia" ];
 		asusd.enable = true;
 		keyd = {
@@ -177,11 +206,7 @@ in {
 					settings = {
 						main = {
 							capslock = "esc";
-				#			"/" = "noop";
 						};
-				# "alt" = {
-				#			";" = "/";
-				#		};
 					};
 				};
 			};
@@ -199,9 +224,4 @@ in {
 	fonts.packages = with pkgs; [
 		(nerdfonts.override { fonts = [ "FiraCode" ]; })
 	];
-
-	networking.firewall = {
-		# allowedTCPPorts = [ 5173 4173 6001 ]; # 9090 443	3000 ];	
-		# allowedUDPPorts = [ 5173 4173 6001 ]; # 9090 443 8081 3000 ];	
-	};
 } 
